@@ -7,10 +7,22 @@
 `for S in $(ls secrets/*.yml) ; do oc create -f $S ; done`
 
 ```bash
-oc create -f jenkins-master/image-stream.yml
-oc create -f jenkins-master/jenkins-sa-admin.yml
+oc create -f jenkins-slave-jjb/openshift/image.yml
+oc start-build jenkins-slave-jjb
+
+oc create -f jenkins-slave-maven/openshift/image.yml
+oc start-build jenkins-slave-maven
+
+oc create -f jenkins-master/openshift/image.yml
+oc start-build jenkins-master
+
+oc create -f jenkins-master/openshift/jenkins-sa-admin.yml
+
 oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)
-oc patch dc/jenkins --patch "$(cat jenkins-master/patch.yml)"
+oc patch dc/jenkins --patch "$(cat jenkins-master/openshift/patch.yml)"
+
+oc create -f dashboard/build.yml
+oc start-build rourka
 ```
 
 Run the `zygote` job.
@@ -21,13 +33,15 @@ Assumes Minishift with a `routing-suffix` of `minishift`.
 
 ### `jenkins-master`
 
+Initial OpenShift config:
+- same as in _Deploy_:
+    - create secrets
+    - create Jenkins slave image streams and builds configs, start Jenkins slave builds
+    - create Jenkins service account admin role binding
+
 Login to Minishift Docker:
 - `eval $(minishift docker-env)`
 - `docker login -u $(oc whoami) -p $(oc whoami -t) $(minishift openshift registry)`
-
-Initial OpenShift config:
-- `for S in $(ls ../secrets/*.yml) ; do oc create -f $S ; done`
-- `oc create -f jenkins-sa-admin.yml`
 
 Build a Jenkins master image:
 - `docker build -t docker-registry-default.minishift:443/myproject/jenkins:latest .`
@@ -35,7 +49,7 @@ Build a Jenkins master image:
 
 Deploy Jenkins master:
 - `oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)`
-- `oc patch dc/jenkins --patch "$(cat patch.yml)"`
+- `oc patch dc/jenkins --patch "$(cat openshift/patch.yml)"`
 
 Changes:
 - just `docker build` and `docker push` as above
