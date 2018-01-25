@@ -4,21 +4,22 @@
 
 `oc project xxx` or `oc new-project xxx`
 
-`for S in $(ls secrets/*.yml) ; do oc create -f $S ; done`
-
 ```bash
-oc create -f jenkins-slave-jjb/openshift/image.yml
+for S in $(ls secrets/*.yml) ; do oc create -f $S ; done
+
+oc create -f jenkins-master/openshift/image-template.yml
+
+oc process jenkins-image-template NAME=jenkins-slave-jjb   REPO_NAME=jenkins-slave-jjb   | oc apply -f -
+oc process jenkins-image-template NAME=jenkins-slave-maven REPO_NAME=jenkins-slave-maven | oc apply -f -
+oc process jenkins-image-template NAME=jenkins             REPO_NAME=jenkins-master      | oc apply -f -
+
 oc start-build jenkins-slave-jjb
-
-oc create -f jenkins-slave-maven/openshift/image.yml
 oc start-build jenkins-slave-maven
-
-oc create -f jenkins-master/openshift/image.yml
-oc start-build jenkins-master
+oc start-build jenkins
 
 oc create -f jenkins-master/openshift/jenkins-sa-admin.yml
 
-oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)
+oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q)
 oc patch dc/jenkins --patch "$(cat jenkins-master/openshift/patch.yml)"
 
 oc create -f dashboard/build.yml
@@ -36,7 +37,7 @@ Assumes Minishift with a `routing-suffix` of `minishift`.
 Initial OpenShift config:
 - same as in _Deploy_:
     - create secrets
-    - create Jenkins slave image streams and builds configs, start Jenkins slave builds
+    - create Jenkins image streams and builds configs, start Jenkins builds
     - create Jenkins service account admin role binding
 
 Login to Minishift Docker:
