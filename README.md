@@ -1,4 +1,4 @@
-# RHOAR Boosters Tests aka _Rourka_
+# RHOAR Boosters CI
 
 ## Deploy
 
@@ -21,16 +21,15 @@ oc create -f jenkins-master/openshift/jenkins-sa-admin.yml
 
 oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q)
 oc patch dc/jenkins --patch "$(cat jenkins-master/openshift/patch.yml)"
-
-oc create -f dashboard/build.yml
-oc start-build rourka
 ```
 
 Run the `zygote` job.
 
+To deploy the dashboard, run the `infra-dashboard-master` job.
+
 ## Develop
 
-Assumes Minishift with a `routing-suffix` of `minishift`.
+Assumes Minishift.
 
 ### `jenkins-master`
 
@@ -45,11 +44,11 @@ Login to Minishift Docker:
 - `docker login -u $(oc whoami) -p $(oc whoami -t) $(minishift openshift registry)`
 
 Build a Jenkins master image:
-- `docker build -t docker-registry-default.minishift:443/myproject/jenkins:latest .`
-- `docker push docker-registry-default.minishift:443/myproject/jenkins:latest`
+- `docker build -t $(minishift openshift registry)/$(oc project -q)/jenkins:latest .`
+- `docker push $(minishift openshift registry)/$(oc project -q)/jenkins:latest`
 
 Deploy Jenkins master:
-- `oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)`
+- `oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q)`
 - `oc patch dc/jenkins --patch "$(cat openshift/patch.yml)"`
 
 Changes:
@@ -59,11 +58,13 @@ Changes:
 
 - edit `src/main/resources/project-local.yml`
 - `mvn clean package`
-- `java -jar target/rourka-swarm.jar -S local`
+- `java -jar target/dashboard-swarm.jar -S local`
 
 ### `jenkins-jobs`
 
+First, build the `jenkins-slave-jjb` image locally: `docker build -t my-jjb-image jenkins-slave-jjb` (in the root dir).
+
 - edit `local-config.ini`
-- `docker run -it --rm --entrypoint bash --net host -v $(pwd):/home/jenkins/jenkins-jobs ladicek/rourka-jenkins-slave-jjb`
+- `docker run -it --rm --entrypoint bash --net host -v $(pwd):/home/jenkins/jenkins-jobs my-jjb-image`
 - `cd ~/jenkins-jobs`
 - `PYTHONHTTPSVERIFY=0 jenkins-jobs --conf local-config.ini update .`
