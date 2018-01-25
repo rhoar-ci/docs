@@ -48,7 +48,7 @@ Build a Jenkins master image:
 - `docker push $(minishift openshift registry)/$(oc project -q)/jenkins:latest`
 
 Deploy Jenkins master:
-- `oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q)`
+- `oc new-app --template=jenkins-ephemeral --param NAMESPACE=$(oc project -q)`
 - `oc patch dc/jenkins --patch "$(cat openshift/patch.yml)"`
 
 Changes:
