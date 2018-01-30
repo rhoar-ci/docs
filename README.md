@@ -67,4 +67,4 @@ First, build the `jenkins-slave-jjb` image locally: `docker build -t my-jjb-imag
 - edit `local-config.ini`
 - `docker run -it --rm --entrypoint bash --net host -v $(pwd):/home/jenkins/jenkins-jobs my-jjb-image`
 - `cd ~/jenkins-jobs`
-- `PYTHONHTTPSVERIFY=0 jenkins-jobs --conf local-config.ini update .`
+- `PYTHONHTTPSVERIFY=0 jenkins-jobs --conf local-config.ini update jobs`
