@@ -68,3 +68,13 @@ First, build the `jenkins-slave-jjb` image locally: `docker build -t my-jjb-imag
 - `docker run -it --rm --entrypoint bash --net host -v $(pwd):/home/jenkins/jenkins-jobs my-jjb-image`
 - `cd ~/jenkins-jobs`
 - `PYTHONHTTPSVERIFY=0 jenkins-jobs --conf local-config.ini update jobs`
+
+## Access to OpenShift Online clusters
+
+- secure an account on the target cluster
+- `oc login` to it
+- `oc new-project rhoar-ci`
+- `oc create serviceaccount rhoar-ci`
+- `oc policy add-role-to-user admin system:serviceaccount:rhoar-ci:rhoar-ci`
+- `oc get serviceaccount rhoar-ci -o yaml`
+- `oc get secret rhoar-ci-token-zzzzz -o jsonpath='{.data.token}'`
