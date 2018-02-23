@@ -77,4 +77,4 @@ First, build the `jenkins-slave-jjb` image locally: `docker build -t my-jjb-imag
 - `oc create serviceaccount rhoar-ci`
 - `oc policy add-role-to-user admin system:serviceaccount:rhoar-ci:rhoar-ci`
 - `oc get serviceaccount rhoar-ci -o yaml`
-- `oc get secret rhoar-ci-token-zzzzz -o jsonpath='{.data.token}'`
+- `oc get secret rhoar-ci-token-zzzzz -o jsonpath='{.data.token}' | base64 -d`
