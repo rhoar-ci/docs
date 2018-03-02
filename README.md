@@ -9,12 +9,14 @@ for S in $(ls secrets/*.yml) ; do oc create -f $S ; done
 
 oc create -f jenkins-master/openshift/image-template.yml
 
-oc process jenkins-image-template NAME=jenkins-slave-jjb   REPO_NAME=jenkins-slave-jjb   | oc apply -f -
-oc process jenkins-image-template NAME=jenkins-slave-maven REPO_NAME=jenkins-slave-maven | oc apply -f -
-oc process jenkins-image-template NAME=jenkins             REPO_NAME=jenkins-master      | oc apply -f -
+oc process jenkins-image-template NAME=jenkins-slave-jjb    REPO_NAME=jenkins-slave-jjb    | oc apply -f -
+oc process jenkins-image-template NAME=jenkins-slave-maven  REPO_NAME=jenkins-slave-maven  | oc apply -f -
+oc process jenkins-image-template NAME=jenkins-slave-nodejs REPO_NAME=jenkins-slave-nodejs | oc apply -f -
+oc process jenkins-image-template NAME=jenkins              REPO_NAME=jenkins-master       | oc apply -f -
 
 oc start-build jenkins-slave-jjb
 oc start-build jenkins-slave-maven
+oc start-build jenkins-slave-nodejs
 oc start-build jenkins
 
 oc create -f jenkins-master/openshift/jenkins-sa-admin.yml
