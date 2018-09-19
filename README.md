@@ -21,7 +21,7 @@ oc start-build jenkins
 
 oc create -f jenkins-master/openshift/jenkins-sa-admin.yml
 
-oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q)
+oc new-app --template=jenkins-persistent --param NAMESPACE=$(oc project -q) --param JENKINS_IMAGE_STREAM_TAG=jenkins:latest
 oc patch dc/jenkins --patch "$(cat jenkins-master/openshift/patch.yml)"
 ```
 
