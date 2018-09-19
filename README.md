@@ -115,7 +115,10 @@ in a terminal session that _didn't_ run `eval $(minishift docker-env)`).
 - secure an account on the target cluster
 - `oc login` to it
 - `oc new-project rhoar-ci`
-- `oc create serviceaccount rhoar-ci`
-- `oc policy add-role-to-user admin system:serviceaccount:rhoar-ci:rhoar-ci`
-- `oc get serviceaccount rhoar-ci -o yaml`
-- `oc get secret rhoar-ci-token-zzzzz -o jsonpath='{.data.token}' | base64 -d`
+
+```bash
+oc create serviceaccount rhoar-ci
+oc policy add-role-to-user admin -z rhoar-ci
+SECRET=$(oc get serviceaccount rhoar-ci -o json | jq -r '.secrets[] | select(.name | test("rhoar-ci-token")) | .name')
+echo $(oc get secret $SECRET -o jsonpath='{.data.token}' | base64 -d)
+```
